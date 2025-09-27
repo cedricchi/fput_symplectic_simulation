@@ -17,13 +17,13 @@ default(fontfamily="Computer Modern",
 function plot_ground_state(sim::gauss_quadrature_pgpe_simulation, solg, sold)
     ground_plot = plot(ann=(:top_left, "(g)"))
     hline!(ground_plot, [sim.μ0 / sim.g], label="μ0/g", legendfontsize=8)
-    plot!(ground_plot, sim.quadrature_x, abs2.(sim.ϕx * solg[end]), label="ground: t=10.0", legendfontsize=8) # t=10.0 for ground state hardcode here
-    plot!(ground_plot, sim.quadrature_x, abs2.(sim.ϕx * solg(1)), label="ground: t=1.0", legendfontsize=8)
+    plot!(ground_plot, sim.quadrature_x, abs2.(sim.ϕx * solg[end]), label="ground: t=10.0", legendfontsize=8, alpha=0.6) # t=10.0 for ground state hardcode here
+    plot!(ground_plot, sim.quadrature_x, abs2.(sim.ϕx * solg(1)), label="ground: t=1.0", legendfontsize=8, alpha=0.6)
     # @info abs2.(sim.ϕx*sold(1))
-    plot!(ground_plot, sim.quadrature_x, abs2.(sim.ϕx * sold(1)), label="sim: t=1.0", legendfontsize=8)
-    plot!(ground_plot, sim.quadrature_x, abs2.(sim.ϕx * sold[end]), label="sim: t=$(sim.sim_time)", legendfontsize=8)
+    # plot!(ground_plot, sim.quadrature_x, abs2.(sim.ϕx * sold(1)), label="sim: t=1.0", legendfontsize=8, alpha=0.6)
+    plot!(ground_plot, sim.quadrature_x, abs2.(sim.ϕx * sold[end]), label="sim: t=$(sim.sim_time)", legendfontsize=8, alpha=0.6)
     xlabel!("x")
-    ylabel!(L"|\psi|^2")
+    ylabel!(L"c_n(t)^2")
     title!("Ground State Density")
     return ground_plot
 end
@@ -88,7 +88,7 @@ end
 ## plot some accurate modes
 function plot_time_evo(sold, pg::gauss_quadrature_pgpe_simulation, λ)
     sim_plot = plot(; title="Modes Evo. λ=$(round(λ, digits=5))",
-        yminorgrid=true, legend=:topright,
+        yminorgrid=true, legend=:bottomright,
         xlabel="t", ylabel="|c_n(t)|^2", ann=(:top_center, "(c)"))
     # for m in 1:300 plot!(sim_plot, sold.t, (t -> abs2(sold(t)[m])).(sold.t), legend=false) end
     for m in 1:pg.quadrature_modes
@@ -101,6 +101,8 @@ function plot_time_evo(sold, pg::gauss_quadrature_pgpe_simulation, λ)
             # plot!(sim_plot, sold.t, 1 .+ abs2.(sold[m, :]), alpha=0.6, label="")
         end
     end
+    hline!(sim_plot, [pg.n0 * pg.recurrence_ratio_criteria], linestyle=:dash,
+        label="$(Int(pg.recurrence_ratio_criteria * 100))% Threshold")
     return sim_plot
 end
 
@@ -108,17 +110,28 @@ end
 function plot_density_heatmap(sold, pg::gauss_quadrature_pgpe_simulation)
     psix = pg.proj_m_complex * sold[:, :]
     density_heatmap_plot = heatmap(sold.t, pg.quadrature_x, abs2.(psix),
-        xlabel="t", ylabel="x", ylims=(-8, 8), ann=(:top_center, text("(d)", :white)),
+        xlabel="t", ylabel="x", ylims=(-8, 8), ann=(:top_center, text("(d)", :white, 10)),
         title="Heatmap of Density (initial mode $(pg.special_mode_number - 1))")
     return density_heatmap_plot
 end
 
 function plot_fourier_transform(freqs, amplitude, pg::gauss_quadrature_pgpe_simulation)
-    mask = amplitude .> 10 # zoom in on significant peaks
-    plot(freqs[mask], amplitude[mask],
+    # mask = amplitude .> 10 # zoom in on significant peaks
+    # plot(freqs[mask], amplitude[mask],
+    fft_plot = plot(freqs, amplitude, yscale=:log10,# marker = (:circle, 1), markercolor=:red,
         xlabel="Frequency",
-        ylabel="Amplitude",
-        xlims=(minimum(freqs[mask]), maximum(freqs[mask])),
+        ylabel="log10(Amplitude)",
+        label="frequencies scaled by log10", # legend=false,
+        # xlims=(minimum(freqs[mask]), maximum(freqs[mask])),
         title="Spectrum (mode $(pg.special_mode_number - 1))",
-        legend=false, ann=(:top_center, "(e)"))
+        ann=(:top_center, "(e)"))
+    fft_enlarge = plot(freqs, amplitude, yscale=:log10,# marker = (:circle, 1), markercolor=:red,
+        xlabel="Frequency",
+        ylabel="log10(Amplitude)",
+        label="frequencies scaled by log10", # legend=false,
+        xlims=(0, 50),
+        # xlims=(minimum(freqs[mask]), maximum(freqs[mask])),
+        title="Zoomed Spectrum (0-50)",
+        ann=(:top_center, "(f)"))
+    return fft_plot, fft_enlarge
 end

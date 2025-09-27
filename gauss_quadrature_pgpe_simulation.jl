@@ -44,13 +44,13 @@ function pgpe!(pg::gauss_quadrature_pgpe_simulation, dc, c, p, t)
     projected_c_n_t = pg.proj_m_complex * c
     # back to mode-space
     projected_back_c_n_t = pg.Proj_m_hc * (pg.quadrature_w .* abs2.(projected_c_n_t) .* projected_c_n_t) # nonlinear in x
-    @. dc = -im * (pg.energy_lvls * c + pg.g * projected_back_c_n_t)         # imaginary time
+    @. dc = -im * (pg.energy_lvls * c + pg.g * projected_back_c_n_t)    # real time evolution
 end
 
 function pgpeg!(pg::gauss_quadrature_pgpe_simulation, dc, c, p, t)
     projected_c_n_t = pg.proj_m_complex * c
     projected_back_c_n_t = pg.Proj_m_hc * (pg.quadrature_w .* abs2.(projected_c_n_t) .* projected_c_n_t) # nonlinear in x
-    @. dc = -((pg.energy_lvls .- pg.μ0) * c + pg.g * projected_back_c_n_t)
+    @. dc = -((pg.energy_lvls .- pg.μ0) * c + pg.g * projected_back_c_n_t)  # imaginary time evolution
 end
 
 function solve_ground_state!(pg::gauss_quadrature_pgpe_simulation; abstol=1e-12, reltol=1e-12)
