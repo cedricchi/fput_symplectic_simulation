@@ -1,4 +1,5 @@
 using Plots
+using Plots.Measures
 
 data = [
     2000  34    1.1529501854649136;
@@ -56,7 +57,7 @@ p1 = plot(n0, ratio,
           legend = false,
           ann=(:top_center, "(a)"))
 
-p2 = plot(n0, rec,
+p2 = plot(n0, rec, left_margin=5mm,
         #   seriestype = :scatter,
           xlabel = "n0",
           ylabel = "Recurrence Count",
@@ -65,7 +66,7 @@ p2 = plot(n0, rec,
           legend = false,
           ann=(:top_center, "(b)"))
 
-p3 = plot(ratio, rec,
+p3 = plot(ratio, rec, left_margin=5mm,
         #   seriestype = :scatter,
           xlabel = "Max Ratio",
           ylabel = "Recurrence Count",
